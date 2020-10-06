@@ -3,29 +3,39 @@ package com.rezarinaldi.databinding
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.widget.*
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.rezarinaldi.databinding.databinding.ActivityMainBinding
+import com.rezarinaldi.databinding.models.Mahasiswa
 import java.util.*
 
-import com.rezarinaldi.databinding.models.Mahasiswa;
-
 class MainActivity : AppCompatActivity() {
-
-
-    private lateinit var editTextDate: EditText
-    private lateinit var btnSubmit: Button
-
-
+    private lateinit var binding: ActivityMainBinding
+    private var pilihanKelamin: String = "Laki Laki"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        editTextDate.setOnClickListener {
+        binding.edtTanggalLahir.setOnClickListener {
             datePicker()
         }
 
-        btnSubmit.setOnClickListener {
+        binding.btnSubmit.setOnClickListener {
+            dataIntent()
+        }
 
+        binding.radioLakiLaki.setOnCheckedChangeListener { _, b ->
+            if (b) {
+                pilihanKelamin = "Laki Laki"
+                Log.e("data", pilihanKelamin)
+            }
+        }
+        binding.radioPerempuan.setOnCheckedChangeListener { _, b ->
+            if (b) {
+                pilihanKelamin = "Perempuan"
+                Log.e("data", pilihanKelamin)
+            }
         }
     }
 
@@ -37,15 +47,29 @@ class MainActivity : AppCompatActivity() {
 
 
         val dpd = DatePickerDialog(
-                this,
-                { _, year, monthOfYear, dayOfMonth ->
-                    val bulan = monthOfYear + 1
-                    editTextDate.setText("$dayOfMonth/$bulan/$year")
-                },
-                year,
-                month,
-                day
+            this,
+            { view, year, monthOfYear, dayOfMonth ->
+                val bulan = monthOfYear + 1
+                binding.edtTanggalLahir.setText("$dayOfMonth/$bulan/$year")
+            },
+            year,
+            month,
+            day
         )
         dpd.show()
+    }
+
+    private fun dataIntent() {
+        val dataMhs = Mahasiswa(
+            nama = binding.edtNama.text.toString(),
+            nim = binding.edtNim.text.toString(),
+            tanggalLahir = binding.edtTanggalLahir.text.toString(),
+            jenisKelamin = pilihanKelamin,
+            jurusan = binding.spinnerJurusan.selectedItem.toString()
+        )
+
+        val resultIntent = Intent(this, DetailActivity::class.java)
+        resultIntent.putExtra("MAHASISWA", dataMhs)
+        startActivity(resultIntent)
     }
 }
